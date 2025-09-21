@@ -4,6 +4,7 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Download, Eye, Leaf, TrendingUp, Calculator, DollarSign, Mail, Upload, Check, ArrowLeft } from "lucide-react"
+import { marked } from "marked"
 import {
   BarChart,
   Bar,
@@ -19,6 +20,13 @@ import {
   Pie,
 } from "recharts"
 import { PDFMergeUpload } from "./pdf-merge-upload"
+
+// Add a global declaration for html2pdf
+declare global {
+  interface Window {
+    html2pdf: any
+  }
+}
 
 export interface FormData {
   customerName: string
@@ -228,8 +236,10 @@ This solar installation represents an excellent investment opportunity with:
 
       console.log("[v0] Markdown content generated, converting to PDF...")
 
-      // Convert markdown to HTML
-      const htmlContent = `
+      // Convert markdown to HTML using the 'marked' library
+      const htmlContent = await marked(markdownContent)
+
+      const fullHtml = `
         <!DOCTYPE html>
         <html>
         <head>
@@ -273,63 +283,26 @@ This solar installation represents an excellent investment opportunity with:
           </style>
         </head>
         <body>
-          ${markdownContent
-            .replace(/\n/g, "<br>")
-            .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
-            .replace(/^# (.*$)/gm, "<h1>$1</h1>")
-            .replace(/^## (.*$)/gm, "<h2>$1</h2>")
-            .replace(/^### (.*$)/gm, "<h3>$1</h3>")
-            .replace(/^\| (.*) \|$/gm, (match) => {
-              if (match.includes("---")) return "<hr>"
-              const cells = match
-                .split("|")
-                .slice(1, -1)
-                .map((cell) => cell.trim())
-              const isHeader = match.includes("Year") && match.includes("Solar Energy")
-              return isHeader
-                ? `<tr>${cells.map((cell) => `<th>${cell}</th>`).join("")}</tr>`
-                : `<tr>${cells.map((cell) => `<td>${cell}</td>`).join("")}</tr>`
-            })
-            .replace(/^(\|.*\|)$/gm, (match, offset, string) => {
-              const prevLine = string.substring(0, offset).split("\n").slice(-2)[0]
-              if (prevLine && prevLine.includes("Year") && prevLine.includes("Solar Energy")) {
-                return "<table>" + match
-              }
-              const nextLines = string.substring(offset).split("\n")
-              const nextNonTableLine = nextLines.find((line) => !line.startsWith("|"))
-              if (nextNonTableLine && nextNonTableLine.includes("*...and")) {
-                return match + "</table>"
-              }
-              return match
-            })}
+          ${htmlContent}
         </body>
         </html>
       `
 
-      // Create a temporary element to render the HTML
-      const tempDiv = document.createElement("div")
-      tempDiv.innerHTML = htmlContent
-      tempDiv.style.position = "absolute"
-      tempDiv.style.left = "-9999px"
-      tempDiv.style.top = "-9999px"
-      document.body.appendChild(tempDiv)
-
-      // Wait for content to render
-      await new Promise((resolve) => setTimeout(resolve, 500))
-
-      console.log("[v0] Loading html2pdf for markdown content...")
+      // Function to load a script and return a promise
+      const loadScript = (src: string) => {
+        return new Promise((resolve, reject) => {
+          const script = document.createElement("script")
+          script.src = src
+          script.onload = resolve
+          script.onerror = reject
+          document.head.appendChild(script)
+        })
+      }
 
       // Load html2pdf from CDN if not available
       if (!window.html2pdf) {
-        const script = document.createElement("script")
-        script.src = "https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"
-        document.head.appendChild(script)
-
-        // Wait for script to load
-        await new Promise((resolve, reject) => {
-          script.onload = resolve
-          script.onerror = reject
-        })
+        console.log("[v0] Loading html2pdf for markdown content...")
+        await loadScript("https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js")
       }
 
       const options = {
@@ -348,11 +321,8 @@ This solar installation represents an excellent investment opportunity with:
         },
       }
 
-      // Generate PDF from the markdown HTML using the global html2pdf function
-      await window.html2pdf().set(options).from(tempDiv).save()
-
-      // Clean up
-      document.body.removeChild(tempDiv)
+      // Generate PDF from the HTML using the global html2pdf function
+      await window.html2pdf().set(options).from(fullHtml).save()
 
       console.log("[v0] Markdown PDF generated successfully")
     } catch (error) {
