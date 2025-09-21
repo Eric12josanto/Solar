@@ -15,7 +15,8 @@ export default function HomePage() {
   const [companyInfo, setCompanyInfo] = useState({
     name: "",
     phone: "",
-    logo: null as File | null,
+    logo: null as string | null,
+    logoName: "",
   })
   const [currency, setCurrency] = useState<"INR" | "USD">("INR")
   const [logoPreview, setLogoPreview] = useState<string | null>(null)
@@ -29,14 +30,20 @@ export default function HomePage() {
   const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
-      setCompanyInfo((prev) => ({ ...prev, logo: file }))
-      const previewUrl = URL.createObjectURL(file)
-      setLogoPreview(previewUrl)
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        const dataUrl = reader.result as string
+        setCompanyInfo((prev) => ({ ...prev, logo: dataUrl, logoName: file.name }))
+        setLogoPreview(dataUrl)
+      }
+      reader.readAsDataURL(file)
     }
   }
 
   if (showForm) {
-    return <TypeformFlow companyInfo={companyInfo} currency={currency} />
+    // We need to pass the correct shape of companyInfo
+    const { logoName, ...companyInfoForFlow } = companyInfo
+    return <TypeformFlow companyInfo={companyInfoForFlow} currency={currency} />
   }
 
   return (
@@ -126,14 +133,14 @@ export default function HomePage() {
                       className="h-16 w-16 object-contain rounded-lg border bg-white"
                     />
                     <div className="flex-1">
-                      <p className="text-sm font-medium text-green-800">✓ {companyInfo.logo?.name}</p>
+                      <p className="text-sm font-medium text-green-800">✓ {companyInfo.logoName}</p>
                       <p className="text-xs text-green-600">Logo uploaded successfully</p>
                     </div>
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => {
-                        setCompanyInfo((prev) => ({ ...prev, logo: null }))
+                        setCompanyInfo((prev) => ({ ...prev, logo: null, logoName: "" }))
                         setLogoPreview(null)
                       }}
                       className="text-red-500 hover:text-red-700"

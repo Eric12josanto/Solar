@@ -47,7 +47,7 @@ export interface FormData {
 export interface CompanyInfo {
   name: string
   phone: string
-  logo: File | null
+  logo: string | null
 }
 
 interface ReportPreviewProps {
@@ -453,7 +453,7 @@ This solar installation represents an excellent investment opportunity with:
               {companyInfo.logo && (
                 <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-lg overflow-hidden border-2 border-orange-200 flex-shrink-0">
                   <img
-                    src={URL.createObjectURL(companyInfo.logo) || "/placeholder.svg"}
+                    src={companyInfo.logo || "/placeholder.svg"}
                     alt={`${companyInfo.name} logo`}
                     className="w-full h-full object-cover"
                   />
@@ -810,7 +810,7 @@ This solar installation represents an excellent investment opportunity with:
                 {companyInfo.logo && (
                   <div className="w-16 h-16 sm:w-24 sm:h-24 md:w-32 md:h-32 mx-auto mb-4 rounded-lg overflow-hidden border-2 border-gray-200">
                     <img
-                      src={URL.createObjectURL(companyInfo.logo) || "/placeholder.svg"}
+                      src={companyInfo.logo || "/placeholder.svg"}
                       alt={`${companyInfo.name} logo`}
                       className="w-full h-full object-cover"
                     />

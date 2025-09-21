@@ -12,7 +12,7 @@ import { ReportPreview } from "@/components/report-preview"
 interface CompanyInfo {
   name: string
   phone: string
-  logo: File | null
+  logo: string | null
 }
 
 interface FormData {
