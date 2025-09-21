@@ -464,7 +464,7 @@ This solar installation represents an excellent investment opportunity with:
                   </h3>
                   <div className="h-40 sm:h-48 md:h-64">
                     <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={summaryMetrics} layout="horizontal">
+                      <BarChart data={summaryMetrics} layout="horizontal" isAnimationActive={false}>
                         <CartesianGrid strokeDasharray="3 3" />
                         <XAxis type="number" />
                         <YAxis dataKey="name" type="category" width={60} />
@@ -505,6 +505,7 @@ This solar installation represents an excellent investment opportunity with:
                     <ResponsiveContainer width="100%" height="100%">
                       <RechartsPieChart>
                         <Pie
+                          isAnimationActive={false}
                           data={financialBreakdown}
                           cx="50%"
                           cy="50%"
@@ -634,7 +635,7 @@ This solar installation represents an excellent investment opportunity with:
               <CardContent>
                 <div className="h-60 sm:h-80 md:h-96">
                   <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={yearlyData}>
+                    <AreaChart data={yearlyData} isAnimationActive={false}>
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="year" />
                       <YAxis />
@@ -659,7 +660,7 @@ This solar installation represents an excellent investment opportunity with:
               <CardContent>
                 <div className="h-60 sm:h-80 md:h-96">
                   <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={yearlyData.slice(0, 15)}>
+                    <BarChart data={yearlyData.slice(0, 15)} isAnimationActive={false}>
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="year" />
                       <YAxis />
