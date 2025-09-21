@@ -8,7 +8,7 @@ import { Suspense } from "react"
 import "./globals.css"
 
 const timesNewRoman = Times_New_Roman({
-  weight: ["400", "700"],
+  weight: "400",
   subsets: ["latin"],
   variable: "--font-times",
 })
