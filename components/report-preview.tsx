@@ -57,14 +57,12 @@ interface ReportPreviewProps {
 }
 
 export function ReportPreview({ formData, companyInfo, currency }: ReportPreviewProps) {
-  const [showDownload, setShowDownload] = useState(false)
   const [showMergeUpload, setShowMergeUpload] = useState(false)
   const [mergedDocument, setMergedDocument] = useState<string | null>(null)
   const [uploadedPDF, setUploadedPDF] = useState<File | null>(null)
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false)
 
   const currencySymbol = currency === "INR" ? "₹" : "$"
-  const reportPrice = currency === "INR" ? "₹99" : "$4.99"
 
   const treesEquivalent = formData.projectCapacity * 75
   const annualGeneration = formData.projectCapacity * 1200
@@ -127,10 +125,6 @@ export function ReportPreview({ formData, companyInfo, currency }: ReportPreview
       setUploadedPDF(fileInput.files[0])
       console.log("[v0] PDF file stored successfully:", fileInput.files[0].name)
     }
-  }
-
-  const handleGetReport = () => {
-    setShowDownload(true)
   }
 
   const generateMarkdownPDF = async () => {
@@ -354,94 +348,6 @@ This solar installation represents an excellent investment opportunity with:
     }
   }
 
-  if (showDownload) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 p-2 sm:p-4 md:p-6">
-        <div className="max-w-2xl mx-auto">
-          <Card className="shadow-2xl">
-            <CardHeader className="text-center bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-t-lg p-4 sm:p-6">
-              <div className="flex items-center justify-between mb-4">
-                <Button
-                  onClick={() => setShowDownload(false)}
-                  variant="ghost"
-                  className="text-white hover:bg-green-700 p-2"
-                >
-                  <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
-                  <span className="ml-2 hidden sm:inline">Back</span>
-                </Button>
-                <div className="flex-1" />
-              </div>
-              <CardTitle className="text-xl sm:text-2xl md:text-3xl font-bold font-times">Report Ready! 📊</CardTitle>
-              <p className="text-green-100 font-times text-sm sm:text-base">
-                Your professional solar report is ready for download
-              </p>
-            </CardHeader>
-            <CardContent className="p-4 sm:p-6 md:p-8 text-center space-y-4 sm:space-y-6">
-              <div className="bg-green-50 p-3 sm:p-4 md:p-6 rounded-lg">
-                <h3 className="font-semibold text-base sm:text-lg mb-2 text-green-800 font-times">Report Details</h3>
-                <p className="text-xs sm:text-sm text-green-700 font-times">Customer: {formData.customerName}</p>
-                <p className="text-xs sm:text-sm text-green-700 font-times">Capacity: {formData.projectCapacity} kW</p>
-                <p className="text-xs sm:text-sm text-green-700 font-times">
-                  Report Type: Professional Breakeven Analysis
-                </p>
-              </div>
-
-              {mergedDocument && (
-                <div className="bg-blue-50 p-3 sm:p-4 md:p-6 rounded-lg">
-                  <h3 className="font-semibold text-base sm:text-lg mb-2 text-blue-800 font-times">
-                    Merged Document Ready
-                  </h3>
-                  <p className="text-xs sm:text-sm text-blue-700 font-times">{mergedDocument}</p>
-                  <p className="text-xs text-blue-600 font-times mt-2">
-                    Order: Your Original Quotation → Solar Breakeven Report
-                  </p>
-                </div>
-              )}
-
-              <div className="space-y-3 sm:space-y-4">
-                <Button
-                  onClick={mergedDocument ? handleMergedPDFDownload : generateMarkdownPDF}
-                  disabled={isGeneratingPDF}
-                  className="w-full h-12 sm:h-14 md:h-16 text-sm sm:text-base md:text-lg bg-green-600 hover:bg-green-700 disabled:bg-green-400 text-white rounded-md flex items-center justify-center gap-2 transition-colors font-times"
-                >
-                  <Download className="h-4 w-4 sm:h-5 sm:w-5 md:h-5 md:w-5" />
-                  {isGeneratingPDF ? (
-                    <span>Generating Markdown PDF...</span>
-                  ) : mergedDocument ? (
-                    <>
-                      <span className="hidden sm:inline">Download Merged Report (Markdown PDF)</span>
-                      <span className="sm:hidden">Download Merged Report</span>
-                    </>
-                  ) : (
-                    <>
-                      <span className="hidden sm:inline">Download Your Report (Markdown PDF)</span>
-                      <span className="sm:hidden">Download Report</span>
-                    </>
-                  )}
-                </Button>
-
-                <Button
-                  variant="outline"
-                  className="w-full h-10 sm:h-12 bg-transparent font-times text-xs sm:text-sm md:text-base"
-                >
-                  <Mail className="h-4 w-4 mr-2" />
-                  Email Report to {formData.customerName}
-                </Button>
-              </div>
-
-              <div className="text-xs sm:text-sm text-gray-600 font-times space-y-1">
-                <p>📧 A copy has been sent to your email</p>
-                <p>💾 Report will be available for 30 days</p>
-                {mergedDocument && (
-                  <p className="text-blue-600">📋 Merged document includes your original quotation first</p>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    )
-  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -480,11 +386,12 @@ This solar installation represents an excellent investment opportunity with:
                 Preview Mode
               </Button>
               <Button
-                onClick={handleGetReport}
+                onClick={generateMarkdownPDF}
+                disabled={isGeneratingPDF}
                 className="flex items-center gap-2 bg-green-600 hover:bg-green-700 font-times text-xs sm:text-sm"
               >
                 <Download className="h-3 w-3 sm:h-4 sm:w-4 md:h-5 md:w-5" />
-                Download Report - {reportPrice}
+                {isGeneratingPDF ? "Generating..." : "Download Report"}
               </Button>
             </div>
           </div>
@@ -829,14 +736,21 @@ This solar installation represents an excellent investment opportunity with:
         {/* Call to Action */}
         <div className="fixed bottom-2 right-2 sm:bottom-4 sm:right-4 md:bottom-6 md:right-6">
           <Button
-            onClick={handleGetReport}
+            onClick={generateMarkdownPDF}
+            disabled={isGeneratingPDF}
             size="lg"
             className="shadow-2xl bg-green-600 hover:bg-green-700 text-white px-3 sm:px-4 md:px-8 py-2 sm:py-3 md:py-4 text-xs sm:text-sm md:text-base font-times"
           >
             <Download className="h-3 w-3 sm:h-4 sm:w-4 md:h-5 md:w-5 mr-1 sm:mr-2" />
-            <span className="hidden md:inline">Get Full Report - {reportPrice}</span>
-            <span className="hidden sm:inline md:hidden">Get Report - {reportPrice}</span>
-            <span className="sm:hidden">Report - {reportPrice}</span>
+            {isGeneratingPDF ? (
+              "Generating..."
+            ) : (
+              <>
+                <span className="hidden md:inline">Download Full Report</span>
+                <span className="hidden sm:inline md:hidden">Download Report</span>
+                <span className="sm:hidden">Report</span>
+              </>
+            )}
           </Button>
         </div>
       </div>
